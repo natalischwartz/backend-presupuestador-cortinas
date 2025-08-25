@@ -2,14 +2,15 @@ import Product from '../models/product.model.js'
 
  export const getProducts = async (req,res) => {
         try {
-        // Consulta a la base de datos sin ordenar
-
-        const productsCortineria = await Product.find({"category": "cortineria"})
+          // Consulta a la base de datos para ambas categorías en una sola consulta
+        const products = await Product.find({
+            "category": { $in: ["cortineria", "tapiceria"] }
+        });
          // Convertir `price` de cadena a número
-        productsCortineria.forEach(product => {
+        products.forEach(product => {
         product.price =Number(product.price.replace(/[^0-9.-]+/g,"")) ;
         });
-        res.json(productsCortineria);
+        res.json(products);
 
 
         
