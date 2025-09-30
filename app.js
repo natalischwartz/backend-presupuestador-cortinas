@@ -4,20 +4,26 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { config } from 'dotenv'
 config();
-import jwt from 'jsonwebtoken';
+
+
 import { verifySession } from './src/middlewares/verifySession.js';
 import shopRoutes from './src/routes/shopRoutes.js'
-import authRoutes from './src/routes/authRoutes.js'
+import authRoutes from './src/routes/authRoutes.js';
+import { connectToDB } from './src/utils/mongoose.js';
 
 const app = express();
- app.use(cookieParser());
-
 const PORT = process.env.PORT || 3000;
-app.use(cors())
 
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-import { connectToDB } from './src/utils/mongoose.js';
-import { SECRET_JWT_KEY } from './src/config/config.js';
+app.use(verifySession);
+
+app.use(authRoutes);
+app.use(shopRoutes);
+
 
 try {
     await connectToDB();
@@ -25,14 +31,6 @@ try {
     console.error("Error connecting to the database", error);
     process.exit(1); // Exit the process if there's a connection error
   }
-
-
-
-app.use(authRoutes);
-app.use(shopRoutes);
-app.use(verifySession);
-
-
 
 app.listen(PORT,()=> console.log(`http://localhost:${PORT}`));
 

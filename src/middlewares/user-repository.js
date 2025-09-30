@@ -1,39 +1,32 @@
 import User from '../models/User.model.js'
 
+export class userRepository {
+    static async login({ email, password }) {
+        // ✅ 1. Validaciones básicas de entrada
+        if (!email || !password) {
+            throw new Error("Email y contraseña son requeridos");
+        }
 
-export class userRepository{
-    static async login({email,password}){
-        email(email);
-        password(password);
+        // ✅ 2. Buscar usuario (con select explícito si quieres)
+        const userFound = await User.findOne({ email: email });
+        
+        if (!userFound) {
+            // ✅ Mismo mensaje por seguridad - no revelar si el email existe
+            throw new Error("Credenciales inválidas");
+        }
 
+        // ✅ 3. Comparar contraseña
+        const matchPassword = await User.comparePassword(password, userFound.password);
+        
+        if (!matchPassword) {
+            // ✅ Mismo mensaje por seguridad
+            throw new Error("Credenciales inválidas");
+        }
 
+        // ✅ 4. Convertir a objeto plano y eliminar password
+        const userObject = userFound.toObject(); // Convierte el documento Mongoose a objeto JS
+        delete userObject.password;
 
-        //1. Validar si ese mail existe en la base de datos 
-
-        const userFound = await User.findOne({email:email})
-        // console.log(userFound);
-
-        if(!userFound) throw new Error("Email does not exist")
-            // return res.redirect('/login')
-
-        //2. si existe el usuario comparar el password. nos devuelve true or false
-        const matchPassword = await User.comparePassword(password,userFound.password)
-
-        if(!matchPassword) throw new Error("Password is invalid")
-
-        // le quitamos al objeto userFound la propiedad password, para que no se muestre
-
-        const {password: _, ...publicUser} = userFound
-
-
-        // y si matchea el password 
-        return publicUser;
-
-
+        return userObject;
     }
-
-
-
-
-
 }

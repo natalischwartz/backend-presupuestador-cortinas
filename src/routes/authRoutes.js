@@ -9,7 +9,9 @@ import * as authCtrl from '../controllers/authControllers.js'
 
 router.post('/login',authCtrl.logIn)
 
-router.get('/logout', authCtrl.logOut  )
+router.get('/logout', authCtrl.logOut)
+
+router.get('/check-auth', authCtrl.checkAuth)
 
 
 export default router

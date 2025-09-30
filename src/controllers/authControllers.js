@@ -11,12 +11,23 @@ export const logIn = async (req,res) =>{
         const {email,password} = req.body
         // Busca al usuario por su email
 
+         // Validaciones básicas
+        if (!email || !password) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Email y contraseña son requeridos' 
+            });
+        }
+
         const user = await userRepository.login({email,password})
         // res.send({user})
 
         //vamos a crear un TOKEN para la sesion de usuario
 
-        const token = jwt.sign({_id: user._id, email: user.email}, SECRET_JWT_KEY,{
+        const token = jwt.sign(
+            {_id: user._id,
+            email: user.email},
+            SECRET_JWT_KEY,{
             expiresIn:'1h'})
 
         res
@@ -27,15 +38,22 @@ export const logIn = async (req,res) =>{
                 maxAge: 1000*60*60 // la cookie tiene validez por 1 hora
             })
 
-            .redirect("/")
-
-        
-
-
+            res.json({
+            success: true,
+            message: 'Login exitoso',
+            user: {
+                id: user._id,
+                email: user.email
+            },
+            token // Por si el frontend también lo quiere almacenar
+        });
     
 }catch (error) {
-     // Redirigimos a la página de inicio con un mensaje de error
-     res.redirect('/?mensaje=' + encodeURIComponent(error.message));
+     console.error('Error en login:', error);
+        res.status(401).json({
+            success: false,
+            message: error.message
+        });
     }
 }
 
@@ -45,6 +63,16 @@ export const logOut = (req,res) =>{
     res
         .clearCookie('access-token')
         
-        .redirect('/')
+         .json({ 
+           success: true, 
+           message: 'Logout exitoso' 
+       });
+}
 
+// ✅ Endpoint para verificar sesión activa
+export const checkAuth = (req, res) => {
+    res.json({
+        success: true,
+        user: req.session.user
+    });
 }
