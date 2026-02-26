@@ -4,7 +4,7 @@ import Product from '../models/product.model.js'
         try {
           // Consulta a la base de datos para ambas categorías en una sola consulta
         const products = await Product.find({
-            "category": { $in: ["cortineria", "tapiceria"] }
+            "category": { $in: ["cortineria", "tapiceria","cabezal","tipos"] }
         });
          // Convertir `price` de cadena a número
         products.forEach(product => {
